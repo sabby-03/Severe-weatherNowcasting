@@ -1,0 +1,19 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Dashboard | AttestNow</title><link rel="stylesheet" href="style.css"></head><body>
+<div class="app"><aside class="side"><a class="logo" href="index.html" style="display:block;margin-bottom:18px">⛈ Attest<span>Now</span></a><a class="on" href="#">📊 Overview</a><a href="#map">🗺 Risk Map</a><a href="#al">🚨 Alerts</a><a href="index.html">🏠 Home</a><a href="#" onclick="logout()">⎋ Logout</a></aside>
+<main class="main"><div class="top"><div><h2 id="hi">Welcome</h2><span class="sub" id="ro"></span></div><button class="btn ghost" onclick="logout()">Logout</button></div>
+<div class="kpis"><div class="stat"><b id="k1">0</b><span>Active hazards</span></div><div class="stat"><b id="k2" style="color:var(--r)">0</b><span>High-risk zones</span></div><div class="stat"><b>4.2 h</b><span>Avg. lead time</span></div><div class="stat"><b style="color:var(--g)">91%</b><span>Model confidence</span></div></div>
+<div class="panels"><div class="card" id="map"><h3>Live Risk Map (simulated)</h3><canvas id="c" width="700" height="420"></canvas></div>
+<div class="card" id="al"><h3 style="margin-bottom:10px">Location Alerts</h3><div id="list"></div></div></div>
+<div class="card" style="margin-top:16px"><h3>Rainfall forecast — next 6 hours (mm/h)</h3><canvas id="f" width="900" height="200"></canvas></div></main></div>
+<script src="app.js"></script><script>
+const u=me();if(!u)location.href='login.html';
+document.getElementById('hi').textContent='Welcome, '+u.name.split(' ')[0];document.getElementById('ro').textContent=u.role;
+const Z=[["Wayanad, KL",.3,.8,'h','Flood · rain 62mm/h + steep slope + poor drainage'],["Chamoli, UK",.5,.2,'h','Flash flood · cloud burst pattern over Himalayas'],["Odisha Coast",.72,.5,'m','Cyclonic storm · wind shear rising'],["Guwahati, AS",.86,.3,'m','Thunderstorm · Brahmaputra basin saturated'],["Mumbai, MH",.22,.55,'l','Moderate rain · drainage capacity ok']];
+document.getElementById('k1').textContent=Z.length;document.getElementById('k2').textContent=Z.filter(z=>z[3]=='h').length;
+document.getElementById('list').innerHTML=Z.map(z=>`<div class="al"><span class="sev ${z[3]}">${{h:'HIGH',m:'MED',l:'LOW'}[z[3]]}</span><b>${z[0]}</b>${z[4]}<br><small style="color:var(--mut)">Why (XAI): rainfall, elevation, drainage</small></div>`).join('');
+const c=document.getElementById('c').getContext('2d'),col={h:'244,63,94',m:'251,146,60',l:'52,211,153'};let t=0;
+function draw(){c.clearRect(0,0,700,420);c.strokeStyle='#1f2d4a';for(let i=0;i<700;i+=50){c.beginPath();c.moveTo(i,0);c.lineTo(i,420);c.stroke()}for(let i=0;i<420;i+=50){c.beginPath();c.moveTo(0,i);c.lineTo(700,i);c.stroke()}
+c.fillStyle='#8fa1c7';c.font='12px sans-serif';c.fillText('INDIA (schematic)',12,20);t+=.03;
+Z.forEach(z=>{const x=z[1]*700,y=z[2]*420,r=26+8*Math.sin(t+x);const g=c.createRadialGradient(x,y,2,x,y,r+16);g.addColorStop(0,`rgba(${col[z[3]]},.9)`);g.addColorStop(1,`rgba(${col[z[3]]},0)`);c.fillStyle=g;c.beginPath();c.arc(x,y,r+16,0,7);c.fill();c.fillStyle='#e8eefc';c.fillText(z[0],x+10,y-8)});requestAnimationFrame(draw)}draw();
+const f=document.getElementById('f').getContext('2d'),d=[4,8,15,32,48,62,40];d.forEach((v,i)=>{f.fillStyle=v>45?'#f43f5e':v>20?'#fb923c':'#38bdf8';f.fillRect(50+i*120,190-v*2.6,70,v*2.6);f.fillStyle='#8fa1c7';f.fillText('+'+i+'h',70+i*120,196);f.fillText(v,78+i*120,180-v*2.6)});
+</script></body></html>
